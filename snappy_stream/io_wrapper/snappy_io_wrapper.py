@@ -1,12 +1,16 @@
 import snappy
 from . import WriteWrapper, ReadWrapper
-from .chunk_io_wrapper import ChunkWriteWrapper
+from .chunk_io_wrapper import ChunkWriteWrapper, ChunkReadWrapper
 
 
 class SnappyWriteStreamCore(WriteWrapper):
-    def __init__(self, sink, owns_sink):
-        super(SnappyWriteStreamCore, self).__init__(sink, owns_sink=owns_sink)
-        self._compressor = snappy.StreamCompressor()
+    _compressor_instance = None
+
+    @property
+    def _compressor(self):
+        if self._compressor_instance is None:
+            self._compressor_instance = snappy.StreamCompressor()
+        return self._compressor_instance
 
     def write(self, chunk):
         compressed = self._compressor.add_chunk(chunk)
@@ -33,13 +37,8 @@ class SnappyWriteWrapper(WriteWrapper):
 
 
 
-class SnappyReadWrapper(ReadWrapper):
+class SnappyReadStreamCore(ReadWrapper):
     _decompressor_instance = None
-    _buff = b''
-
-    def __init__(self, source, owns_source, chunk_size=SnappyConsts.MAX_CHUNK):
-        super(SnappyReadWrapper, self).__init__(source, owns_source=owns_source)
-        self.chunk_size = chunk_size
 
     @property
     def _decompressor(self):
@@ -47,38 +46,21 @@ class SnappyReadWrapper(ReadWrapper):
             self._decompressor_instance = snappy.StreamDecompressor()
         return self._decompressor_instance
 
-    def _read_chunk(self):
-        block = self.source.read(self.chunk_size)
-        if not block:
-            return b''
-        buffed = self._decompressor.decompress(block)
-        return buffed
-
     def read(self, n=-1):
-        output = []
-        out_len = 0
+        buff = self.source.read(n)
+        if not buff:
+            return buff
+        return self._decompressor.decompress(buff)
 
-        chunk = self._buff[:n]
-        self._buff = self._buff[n:]
-        output.append(chunk)
-        out_len = len(chunk)
 
-        while True:
-            if n > 0 and out_len >= n:
-                break
-            if not self._buff:
-                next_chunk = self._read_chunk()
-                self._buff += next_chunk
-                if not self._buff:
-                    break
-            if n > 0:
-                delta = n - out_len
-                chunk = self._buff[:delta]
-                self._buff = self._buff[delta:]
-            else:
-                chunk = self._buff
-                self._buff = b''
-            out_len += len(chunk)
-            output.append(chunk)
+class SnappyReadWrapper(ReadWrapper):
+    def __init__(self, source, owns_source, chunk_size=SnappyConsts.MAX_CHUNK):
+        super(SnappyReadWrapper, self).__init__(
+            ChunkReadWrapper(
+                source=SnappyReadStreamCore(source, owns_source=owns_source),
+                chunk_size=chunk_size,
+                owns_source=True
+            ),
+            owns_source=True
+        )
 
-        return b''.join(output)
