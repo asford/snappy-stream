@@ -5,7 +5,7 @@ from .chunk_io_wrapper import ChunkWriteWrapper
 
 class SnappyWriteStreamCore(WriteWrapper):
     def __init__(self, sink, owns_sink):
-        super().__init__(sink, owns_sink=owns_sink)
+        super(SnappyWriteStreamCore, self).__init__(sink, owns_sink=owns_sink)
         self._compressor = snappy.StreamCompressor()
 
     def write(self, chunk):
@@ -22,7 +22,7 @@ class SnappyConsts(object):
 
 class SnappyWriteWrapper(WriteWrapper):
     def __init__(self, sink, owns_sink, chunk_size=SnappyConsts.MAX_CHUNK):
-        super().__init__(
+        super(SnappyWriteWrapper, self).__init__(
             ChunkWriteWrapper(
                 sink=SnappyWriteStreamCore(sink, owns_sink=owns_sink),
                 chunk_size=chunk_size,
@@ -38,7 +38,7 @@ class SnappyReadWrapper(ReadWrapper):
     _buff = b''
 
     def __init__(self, source, owns_source, chunk_size=SnappyConsts.MAX_CHUNK):
-        super().__init__(source, owns_source=owns_source)
+        super(SnappyReadWrapper, self).__init__(source, owns_source=owns_source)
         self.chunk_size = chunk_size
 
     @property

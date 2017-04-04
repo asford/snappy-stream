@@ -2,7 +2,7 @@ from . import WriteWrapper
 
 class ChunkWriteWrapper(WriteWrapper):
     def __init__(self, sink, chunk_size, owns_sink):
-        super().__init__(sink, owns_sink)
+        super(ChunkWriteWrapper, self).__init__(sink, owns_sink)
         self.chunk_size = chunk_size
         self._chunks = []
         self._chunks_len = 0
@@ -20,7 +20,7 @@ class ChunkWriteWrapper(WriteWrapper):
 
 
     def close(self):
-        super().close()
+        super(ChunkWriteWrapper, self).close()
 
     def flush_self(self):
         self._drain()
