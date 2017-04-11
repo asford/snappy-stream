@@ -88,3 +88,8 @@ with open_s3_read_bytestream('s3://some-bucket/something') as fin:
 ## design
 The adapter interfaces are intentionally one-way -- there's no adapter for both reading and writing.  You can do something like this by using separate read and write wrappers to one stream.
 
+
+## license
+
+MIT
+
