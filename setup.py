@@ -3,13 +3,13 @@ from setuptools import setup
 
 setup(
     name='snappy-stream',
-    version='0.9.0',
+    version='0.9.1',
     url='https://github.com/CurataEng/snappy-stream',
     license='MIT',
     author='Scott Ivey / Curata Inc.',
     author_email='scott@curata.com',
     description='Streaming snappy compression for Python file-like objects, with helpers for local FS + S3',
-    packages=['snappy_stream'],
+    packages=['snappy_stream', 'snappy_stream.detail', 'snappy_stream.io_wrapper'],
     zip_safe=False,
     platforms='any',
     install_requires=[
