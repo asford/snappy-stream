@@ -13,10 +13,8 @@ class ChunkWriteWrapper(WriteWrapper):
         remaining = b''.join(self._chunks)
         self._chunks = []
         self._chunks_len = 0
-        while remaining:
-            current = remaining[:self.chunk_size]
-            remaining = remaining[self.chunk_size:]
-            self._write_chunk(current)
+        for i in range(0, len(remaining), self.chunk_size):
+            self._write_chunk(remaining[i:i+self.chunk_size])
 
 
     def close(self):
