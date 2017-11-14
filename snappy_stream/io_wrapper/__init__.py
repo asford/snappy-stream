@@ -2,7 +2,6 @@ import os
 import contextlib
 import csv
 import snappy
-import smart_open
 import io
 
 class WriteWrapper(io.IOBase):
