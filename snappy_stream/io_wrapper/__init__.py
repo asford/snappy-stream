@@ -29,6 +29,9 @@ class WriteWrapper(io.IOBase):
     def write(self, chunk):
         self.sink.write(chunk)
 
+    def writable(self):
+        return True
+
 
 
 class ReadWrapper(io.IOBase):
@@ -47,3 +50,10 @@ class ReadWrapper(io.IOBase):
     def read(self, size=-1):
         return self.source.read(size)
 
+    def readinto(self, b):
+        res = self.read(len(b))
+        b[:len(res)] = res
+        return len(res)
+
+    def readable(self):
+        return True
